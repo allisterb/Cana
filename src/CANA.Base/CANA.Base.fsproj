@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <DependsOnNETStandard>True</DependsOnNETStandard>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Api.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="Behaviors.fs" />
+    <Compile Include="Extensions.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.4" />
+  </ItemGroup>
+
+</Project>

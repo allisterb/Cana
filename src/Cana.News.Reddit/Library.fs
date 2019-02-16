@@ -1,4 +1,4 @@
-namespace CANA.Retrieve
+namespace Cana.News.Reddit
 
 module Say =
     let hello name =
