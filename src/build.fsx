@@ -2,9 +2,10 @@
 // FAKE build script
 // --------------------------------------------------------------------------------------
 
-#r "./packages/build/FAKE/tools/FakeLib.dll"
+#r "./packages/FAKE/tools/FakeLib.dll"
 
 open Fake
+open Fake.Core
 open System
 
 // --------------------------------------------------------------------------------------
@@ -21,6 +22,7 @@ let mutable dotnetExePath = "dotnet"
 // --------------------------------------------------------------------------------------
 
 let run' timeout cmd args dir =
+
     if execProcess (fun info ->
         info.FileName <- cmd
         if not (String.IsNullOrWhiteSpace dir) then

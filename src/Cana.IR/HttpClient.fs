@@ -9,7 +9,7 @@ open Cana
 type HttpClient(url: string, ?proxy: string) =
     inherit CanaApi()
     
-    let fetchUrl callback url =        
+    member this.fetchUrl callback url =        
         let req = WebRequest.Create(Uri(url)) 
         use resp = req.GetResponse() 
         use stream = resp.GetResponseStream() 
