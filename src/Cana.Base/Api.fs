@@ -1,4 +1,17 @@
-﻿namespace Cana
+namespace Cana
+
+open System
+open System.Diagnostics
+
+[<AbstractClass>]
+type CanaApi() =
+    do if CanaApi.Logger = None then failwith "A logger is not assigned." else ()
+
+    static member val Logger :Logger option = None with get,set
+    
+    member this.Info(messageTemplate:string, [<ParamArray>]args:obj[]) = CanaApi.Logger.Value.Info(messageTemplate, args)
+    member this.Debug(messageTemplate:string, [<ParamArray>]args:obj[]) = CanaApi.Logger.Value.Debug(messageTemplate, args)
+    member this.Error(messageTemplate:string, [<ParamArray>]args:obj[]) = CanaApi.Logger.Value.Error(messageTemplate, args)
 
 [<AutoOpen>]
 module Api = 
@@ -61,5 +74,3 @@ module Api =
 
     let (|Default|) defaultValue input =
         defaultArg input defaultValue
-
-

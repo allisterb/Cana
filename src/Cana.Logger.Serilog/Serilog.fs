@@ -4,7 +4,7 @@ open System
 open Serilog
 open Serilog.Core
 
-type SerilogLogger(?logFileName: string) = 
+type SerilogLogger(?logFileName: string) as this = 
     inherit Cana.Logger()
     
     let file = defaultArg logFileName "Cana.log"
@@ -16,6 +16,7 @@ type SerilogLogger(?logFileName: string) =
     let logger = 
         let l = config.CreateLogger()
         Logger.IsConfigured <- true
+        CanaApi.Logger <- Some (upcast this)
         l
         
     override this.Debug (messageTemplate:string, [<ParamArray>] args: obj[]) = logger.Information(messageTemplate, args)
