@@ -9,8 +9,8 @@ module Types =
     and Email = {Address: string}        
     
     and Name = 
-        | FullName of string
-        | FirstLastName of string * string
+    | FullName of string
+    | FirstLastName of string * string
 
     type Content = { Text: string; Uri : Uri option; Attrs: Map<string, obj> option}
 

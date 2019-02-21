@@ -1,20 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <OutputType>Library</OutputType>
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
-      
   <ItemGroup>
-    <Compile Include="HttpClient.fs" />
+    <Compile Include="Serilog.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Cana.Base\Cana.Base.fsproj" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.5.4" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
-
 </Project>

@@ -3,3 +3,5 @@
 (?d)*obj/
 (?d)*Debug/
 (?d)*Release/
+*packages/
+*paket-files/

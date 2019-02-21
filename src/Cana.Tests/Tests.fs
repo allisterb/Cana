@@ -1,9 +1,14 @@
-module Base
+module LoggerTests
 
 open System
+open System.IO
 open Xunit
-open FsCheck.Xunit
 
-[<Property>]
-let ``Reverse of reverse of a list is the original list ``(xs:list<int>) =
-  List.rev(List.rev xs) = xs
+open Cana
+
+[<Fact>]
+let ``Can create SerilogLogger ``() =
+    let s = SerilogLogger()
+    do s.Info("Hello")
+    File.Exists "Cana.log" |> Assert.True
+    

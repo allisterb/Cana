@@ -1,4 +1,4 @@
-﻿namespace CANA
+﻿namespace Cana
 
 [<AutoOpen>]
 module Api = 

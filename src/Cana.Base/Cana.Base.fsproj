@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <DependsOnNETStandard>True</DependsOnNETStandard>
+    <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Api.fs" />
+    <Compile Include="Logger.fs" />
+    <Compile Include="CanaApi.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Behaviors.fs" />
     <Compile Include="Extensions.fs" />

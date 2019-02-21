@@ -2,7 +2,7 @@
 
 open System
 
-open CANA.News.Types
+open CANA.Types
 
 [<AutoOpen>]
 module Behaviors = 

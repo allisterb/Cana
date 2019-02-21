@@ -3,7 +3,7 @@ module CANA.Extensions
 
 open System;
 
-open CANA.News
+open CANA.Types
 
 type Person with
    
