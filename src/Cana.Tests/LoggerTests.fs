@@ -1,14 +1,16 @@
 module LoggerTests
 
 open System
-open System.IO
 open Xunit
 
 open Cana
 
+printfn "%i log file(s) deleted." <| IO.DeleteFiles true "." "*.log"
+
 [<Fact>]
 let ``Can create SerilogLogger ``() =
+    
     let s = SerilogLogger()
     do s.Info("Hello")
-    File.Exists "Cana.log" |> Assert.True
+    IO.GetFiles true "." "*.log" |> fst > 0 |> Assert.True
     

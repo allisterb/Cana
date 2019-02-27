@@ -16,7 +16,7 @@ type SerilogLogger(?logFileName: string) as this =
     let logger = 
         let l = config.CreateLogger()
         Logger.IsConfigured <- true
-        CanaApi.Logger <- Some (upcast this)
+        Api.Logger <- Some (upcast this)
         l
         
     override this.Debug (messageTemplate:string, [<ParamArray>] args: obj[]) = logger.Information(messageTemplate, args)

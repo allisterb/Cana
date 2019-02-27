@@ -3,3 +3,4 @@ source https://nuget.org/api/v2
 nuget FAKE
 nuget Serilog
 nuget Serilog.Sinks.RollingFile
+nuget System.Net.Http

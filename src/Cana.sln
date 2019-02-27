@@ -9,8 +9,6 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Cana.IR", "Cana.IR\Cana.IR.
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Cana.Tests", "Cana.Tests\Cana.Tests.fsproj", "{E96C2529-7B52-4214-9558-BEA0D58F4D24}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Cana.News.Reddit", "Cana.News.Reddit\Cana.News.Reddit.fsproj", "{7DEAD5AB-E5E1-4BEF-B430-718FAB1C6885}"
-EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Cana.Logger.Serilog", "Cana.Logger.Serilog\Cana.Logger.Serilog.fsproj", "{BF03EB16-7AE5-41FC-A25C-A0A14D977272}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F589C8C5-A411-4679-B530-FDCB38F4278E}"

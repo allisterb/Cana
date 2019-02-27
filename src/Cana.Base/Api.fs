@@ -2,19 +2,32 @@ namespace Cana
 
 open System
 open System.Diagnostics
+open System.Threading.Tasks
+open System.Threading
 
 [<AbstractClass>]
-type CanaApi() =
-    do if CanaApi.Logger = None then failwith "A logger is not assigned." else ()
+type Api(?ct: CancellationToken) =
+    do if Api.Logger = None then failwith "A logger is not assigned." else ()
 
     static member val Logger :Logger option = None with get,set
-    
-    member this.Info(messageTemplate:string, [<ParamArray>]args:obj[]) = CanaApi.Logger.Value.Info(messageTemplate, args)
-    member this.Debug(messageTemplate:string, [<ParamArray>]args:obj[]) = CanaApi.Logger.Value.Debug(messageTemplate, args)
-    member this.Error(messageTemplate:string, [<ParamArray>]args:obj[]) = CanaApi.Logger.Value.Error(messageTemplate, args)
+
+    static member CTS = new CancellationTokenSource()
+
+    static member Info(messageTemplate:string, [<ParamArray>]args:obj[]) = Api.Logger.Value.Info(messageTemplate, args)
+    static member Debug(messageTemplate:string, [<ParamArray>]args:obj[]) = Api.Logger.Value.Debug(messageTemplate, args)
+    static member Error(messageTemplate:string, [<ParamArray>]args:obj[]) = Api.Logger.Value.Error(messageTemplate, args)
+
+    member x.CancellationToken = if ct.IsSome then ct.Value else Api.CTS.Token 
 
 [<AutoOpen>]
-module Api = 
+module ApiLogic = 
+    let inline (~%) (x:Option<_>) = x.IsSome
+    
+    let SetLogger logger = 
+        if % Api.Logger then
+            failwith "A logger is already assigned."
+        else Api.Logger <- Some(logger)
+
     type ApiResult<'TSuccess,'TFailure> = 
         | Success of 'TSuccess
         | Failure of 'TFailure
@@ -42,35 +55,9 @@ module Api =
         with
         | ex -> Failure ex.Message
 
-
-
-    type State<'Event> =
-        | Next of ('Event -> State<'Event>)
-        | Stop
-
-    let feed state event =
-        match state with
-        | Stop -> failwith "Terminal state reached"
-        | Next handler -> event |> handler
-
-    type StateMachine<'event>(initial: State<'event>) =
-        let mutable current = initial
-        member this.Fire event = current <- feed current event
-        member this.IsStopped 
-            with get () = match current with | Stop -> true | _ -> false
-
-    let createMachine initial = StateMachine(initial)
-
-    let createAgent initial = 
-        MailboxProcessor.Start (fun inbox -> 
-            let rec loop state = async {
-                let! event = inbox.Receive ()
-                match event |> feed state with
-                | Stop -> ()
-                | Next _ as next -> return! loop next
-            }
-            loop initial
-        )
-
     let (|Default|) defaultValue input =
         defaultArg input defaultValue
+
+    
+
+    let inline (?) (l:bool) (r, j) = if l then r else j
