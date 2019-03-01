@@ -1,4 +1,4 @@
-module LoggerTests
+module Logger
 
 open System
 

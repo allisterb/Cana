@@ -18,7 +18,7 @@ type TestApi(init) as this =
 
     
 
-let f = !? TestApi(Success null)
+let f = !! TestApi(true)
 
 let z5 = f.A >=> f.B
 

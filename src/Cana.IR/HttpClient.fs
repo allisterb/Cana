@@ -10,20 +10,22 @@ open System.Threading.Tasks
 open Cana
 open System.Threading
 
-type HttpClient(url: string, contentType: HttpClientContentType, ?proxy: string, ?ct: CancellationToken) =
+type HttpClient(baseUrl: string, contentType: HttpClientContentType, ?proxy: string, ?ct: CancellationToken) =
     inherit Api(?ct = ct)
 
-    let mutable _Initialized = Failure null
+    let mutable _Initialized = false
 
-    let urlParsed, urlResult = Uri.TryCreate (url, UriKind.Absolute)
+    let urlParsed, urlResult = Uri.TryCreate (baseUrl, UriKind.Absolute)
 
-    let proxyUrlParsed, proxyUrlResult = if !% proxy then Uri.TryCreate (proxy.Value, UriKind.Absolute) else false, null
+    let proxyUrlParsed, proxyUrlResult = if !? proxy then Uri.TryCreate (proxy.Value, UriKind.Absolute) else false, null
         
     do
         if not urlParsed then 
-            failwithf "Could not parse Url string %s." url 
-        else if !% proxy && not proxyUrlParsed then
-            failwithf "Could not parse proxy Url string %s." proxy.Value 
+            err "Could not parse Url string {0}." [baseUrl]
+            
+        else if !? proxy && not proxyUrlParsed then
+            err "Could not parse proxy Url string {0}." [proxy.Value] 
+        else _Initialized <- true
   
     static member UserAgent = "Cana"
 
@@ -41,7 +43,7 @@ type HttpClient(url: string, contentType: HttpClientContentType, ?proxy: string,
             client.BaseAddress <- x.Url
             do client.DefaultRequestHeaders.Accept.Clear()
             do client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue(x.ContentType.Str))
-            do client.DefaultRequestHeaders.Add("user-agnt", HttpClient.UserAgent)
+            do client.DefaultRequestHeaders.Add("user-agent", HttpClient.UserAgent)
 
             let! r = client.GetAsync(query, x.CancellationToken) |> Async.AwaitTask
             let! content = r.IsSuccessStatusCode ? (r.Content.ReadAsStringAsync(), Task.FromResult "") |> Async.AwaitTask 

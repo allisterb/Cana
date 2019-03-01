@@ -1,4 +1,4 @@
-﻿module HttpClientTests
+﻿module HttpClient
 
 open System
 open System.Threading

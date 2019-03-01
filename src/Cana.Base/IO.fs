@@ -8,10 +8,10 @@ open System.Threading
 type IO() =
     inherit Api()
 
-    override x.Initialized = Success null
+    override x.Initialized = true
 
     static member GetFiles recurse pattern srcPath =
-        if not <| Directory.Exists(srcPath) then
+        if not <| Directory.Exists srcPath then
             do Api.Error ("The path {0} does not exist.", srcPath)
             (-1, Array.empty)
         else
@@ -27,13 +27,13 @@ type IO() =
         async { return IO.GetFiles recurse srcPath pattern }
 
     static member DeleteFiles recurse srcPath pattern =
-        if not <| Directory.Exists(srcPath) then
+        if not <| Directory.Exists srcPath then
             do Api.Error("The path {0} does not exist.", srcPath)
             -1
         else
-            let files = Directory.GetFiles(srcPath, pattern, recurse ? (SearchOption.AllDirectories, SearchOption.TopDirectoryOnly))
+            let count, files = IO.GetFiles recurse pattern srcPath
             for file in files do
-                File.Delete(Path.Combine(srcPath, file))
+                File.Delete <| Path.Combine(srcPath, file)
             files.Length
 
     
