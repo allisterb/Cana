@@ -7,10 +7,9 @@ open Xunit
 open Cana
 open Cana.IR
 
-do SerilogLogger() |> SetLogger
-
 [<Fact>]
 let ``Can create client ``() =    
+    Api.SetLogger <| new SerilogLogger()
     let c = HttpClient("https://www.google.com", Html)
     let g = c.GetAsync "/" |> Async.RunSynchronously
     g.Content |> Assert.NotEmpty

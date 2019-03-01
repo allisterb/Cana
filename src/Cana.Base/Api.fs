@@ -5,59 +5,82 @@ open System.Diagnostics
 open System.Threading.Tasks
 open System.Threading
 
+
 [<AbstractClass>]
 type Api(?ct: CancellationToken) =
+    
     do if Api.Logger = None then failwith "A logger is not assigned." else ()
 
-    static member val Logger :Logger option = None with get,set
-
+    static member val private Logger :Logger option = None with get,set
+    static member SetLogger logger = if Api.Logger.IsNone then Api.Logger <- Some(logger) else failwith "A logger is already assigned."
     static member CTS = new CancellationTokenSource()
 
     static member Info(messageTemplate:string, [<ParamArray>]args:obj[]) = Api.Logger.Value.Info(messageTemplate, args)
     static member Debug(messageTemplate:string, [<ParamArray>]args:obj[]) = Api.Logger.Value.Debug(messageTemplate, args)
     static member Error(messageTemplate:string, [<ParamArray>]args:obj[]) = Api.Logger.Value.Error(messageTemplate, args)
 
+    abstract Initialized: ApiResult<obj, obj> with get
+
     member x.CancellationToken = if ct.IsSome then ct.Value else Api.CTS.Token 
+    
+    static member (!?) (o : 'T when 'T :> Api) =
+        match o.Initialized with
+        | Success _ -> o
+        | Failure _ -> failwith "Api object not initialized."
+
+    static member (!?>) (o : 'T when 'T :> Api) =
+        match o.Initialized with
+        | Success _ -> Success o
+        | Failure _ -> Exception "Api object not initialized." |> Failure
+    
+and ApiResult<'TSuccess,'TFailure> = 
+    | Success of 'TSuccess
+    | Failure of 'TFailure
 
 [<AutoOpen>]
-module ApiLogic = 
-    let inline (~%) (x:Option<_>) = x.IsSome
-    
-    let SetLogger logger = 
-        if % Api.Logger then
-            failwith "A logger is already assigned."
-        else Api.Logger <- Some(logger)
+module Api =
 
-    type ApiResult<'TSuccess,'TFailure> = 
-        | Success of 'TSuccess
-        | Failure of 'TFailure
-
-    let bind switchFunction = 
-        function
-        | Success s -> switchFunction s
-        | Failure f -> Failure f
-
-    let (>>=) twoTrackInput switchFunction = 
-        bind switchFunction twoTrackInput 
-
-
-    let (>=>) switch1 switch2 = 
-        switch1 >> (bind switch2)
-    (*
-        match switch1 x with
-        | Success s -> switch2 s
-        | Failure f -> Failure f 
-    *)
-
-    let tryCatch f x =
-        try
-            f x |> Success
-        with
-        | ex -> Failure ex.Message
-
-    let (|Default|) defaultValue input =
+    let (|Default|) defaultValue input =    
         defaultArg input defaultValue
 
+    let bind f = 
+        function
+        | Success value -> f value
+        | Failure failure -> Failure failure
+
+    let bind0 f (v: unit -> ApiResult<'T, Exception>)  =
+        try
+            v() |> bind f
+        with
+        | ex -> Failure ex
+    
+    let bind1 (f: 'T -> ApiResult<'R, Exception>) (v: 'a -> ApiResult<'T, Exception>)  (x1:'a)=
+        try
+            v x1 |> bind f
+        with
+        | ex -> Failure ex
+
+    let bind2 f (v: 'a -> 'b -> ApiResult<'T, Exception>)  (x1:'a) (x2:'b)=
+        try
+            v x1 x2 |> bind f
+        with
+        | ex -> Failure ex
+
+    let inline (>>=) f1 f2 = 
+        bind f2 f1 
+
+    let inline (>=>) f1 f2 = 
+        f1 >> (bind f2)
+    
+    let inline (!>) f1 f2 = bind0 f2 f1
+
+    let inline (!>=) f1  f2= bind1 f2 f1
+
+    let inline (!%) (x:Option<_>) = x.IsSome
+    
+    let inline (?) (l:bool) (r, j) = if l then r else j
+
+ 
     
 
-    let inline (?) (l:bool) (r, j) = if l then r else j
+    

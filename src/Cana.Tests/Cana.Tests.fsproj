@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="BaseApiTests.fs" />
     <Compile Include="HttpClientTests.fs" />
     <Compile Include="LoggerTests.fs" />
   </ItemGroup>
