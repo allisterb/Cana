@@ -1,0 +1,3 @@
+[submodule "deps/abot"]
+	path = deps/abot
+	url = https://github.com/sjdirect/abot.git
