@@ -42,40 +42,44 @@ module Api =
 
     let (|Default|) defaultValue input =    
         defaultArg input defaultValue
+    
+    let tryCatch f x =
+        try
+            f x |> Success
+        with
+        | ex -> Failure ex
+
+    let tryCatch' f x =
+        try
+            f x 
+        with
+        | ex -> Failure ex
 
     let bind f = 
+        function
+        | Success value -> f value |> Success
+        | Failure failure -> Failure failure
+
+    let bind' f = 
         function
         | Success value -> f value
         | Failure failure -> Failure failure
 
-    let bind0 f (v: unit -> ApiResult<'T, Exception>)  =
-        try
-            v() |> bind f
-        with
-        | ex -> Failure ex
-    
-    let bind1 (f: 'T -> ApiResult<'R, Exception>) (v: 'a -> ApiResult<'T, Exception>)  (x1:'a)=
-        try
-            v x1 |> bind f
-        with
-        | ex -> Failure ex
+   
+    let inline (@=) f x = tryCatch f x
 
-    let bind2 f (v: 'a -> 'b -> ApiResult<'T, Exception>)  (x1:'a) (x2:'b)=
-        try
-            v x1 x2 |> bind f
-        with
-        | ex -> Failure ex
-
+    (*
     let inline (>>=) f1 f2 = 
         bind f2 f1 
 
     let inline (>=>) f1 f2 = 
         f1 >> (bind f2)
+    *)
+
+    let inline (>>=) f1 f2  = bind' f2 f1 
+
+    let inline (>=>) f1 f2 = tryCatch' f1 >> (bind' f2)
     
-    let inline (!>) f1 f2 = bind0 f2 f1
-
-    let inline (!>=) f1  f2= bind1 f2 f1
-
     let inline (!%) (x:Option<_>) = x.IsSome
     
     let inline (?) (l:bool) (r, j) = if l then r else j

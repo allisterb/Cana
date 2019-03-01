@@ -7,8 +7,6 @@ open System
 
 new ConsoleLogger() |> Api.SetLogger
 
-new ConsoleLogger() |> Api.SetLogger
-
 type TestApi(init) as this =
     inherit Api() 
     
@@ -22,16 +20,12 @@ type TestApi(init) as this =
 
 let f = !? TestApi(Success null)
 
-//let z0 = !?> TestApi(Success null)
+let z5 = f.A >=> f.B
 
-//let z1 = !?> TestApi(Failure null)
+let z6 = f.A() >>= f.B
 
-//let foo = !> t.B()
-
-let z3 = bind0 f.B f.A
-
-let z4 = f.A >=> f.B
-
+z5()
+z6
 
 
 
