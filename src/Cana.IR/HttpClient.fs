@@ -1,6 +1,7 @@
 namespace Cana.IR
 
 open System
+open System.IO
 open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
@@ -21,8 +22,7 @@ type HttpClient(baseUrl: string, contentType: HttpClientContentType, ?proxy: str
         
     do
         if not urlParsed then 
-            err "Could not parse Url string {0}." [baseUrl]
-            
+            err "Could not parse base Url string {0}." [baseUrl]       
         else if !? proxy && not proxyUrlParsed then
             err "Could not parse proxy Url string {0}." [proxy.Value] 
         else _Initialized <- true
@@ -37,7 +37,7 @@ type HttpClient(baseUrl: string, contentType: HttpClientContentType, ?proxy: str
 
     member x.ContentType = contentType
 
-    member x.GetAsync (query:string) :Async<HttpClientResponse> =        
+    member x.GetAsync (query:string, callback):Async<ApiResult<HttpClientResponse, exn>> =        
         async {
             use client = new SystemHttpClient()
             client.BaseAddress <- x.Url
@@ -46,9 +46,28 @@ type HttpClient(baseUrl: string, contentType: HttpClientContentType, ?proxy: str
             do client.DefaultRequestHeaders.Add("user-agent", HttpClient.UserAgent)
 
             let! r = client.GetAsync(query, x.CancellationToken) |> Async.AwaitTask
-            let! content = r.IsSuccessStatusCode ? (r.Content.ReadAsStringAsync(), Task.FromResult "") |> Async.AwaitTask 
-            return {Success = r.IsSuccessStatusCode; StatusCode = (int) r.StatusCode; Content = content}
+            debug "Received HTTP status code {0} from server" [r.StatusCode]
+           
+            use! stream = 
+                if r.IsSuccessStatusCode then 
+                    r.Content.ReadAsStreamAsync() |> Async.AwaitTask
+                else 
+                    err "Did not receive HTTP success status from server: {0}" [r.StatusCode]
+                    failwith "HTTP request did not succeed."
+            
+            use reader = new IO.StreamReader(stream)
+            return! callback r reader 
         }
+
+    member x.GetAsync (query:string) :Async<ApiResult<HttpClientResponse, exn>> =
+        let callback (response: HttpResponseMessage) (reader:StreamReader) =
+            async {
+                let! r = reader.ReadToEndAsync() |> Async.AwaitTask
+                return {Success = true; StatusCode = (int) response.StatusCode; Content = r} |> Success
+            } 
+        x.GetAsync(query, callback)
+            
+    member x.Get (query:string) :ApiResult<HttpClientResponse, exn> = x.GetAsync(query) |> Async.RunSynchronously
 
 and SystemHttpClient = System.Net.Http.HttpClient
 

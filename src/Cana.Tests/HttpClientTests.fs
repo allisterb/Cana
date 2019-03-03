@@ -9,11 +9,15 @@ open Cana.IR
 
 [<Fact>]
 let ``Can create client ``() =    
-    Api.SetLogger <| new SerilogLogger()
+    Api.SetLoggerIfNone <| new SerilogLogger()
     let c = HttpClient("https://www.google.com", Html)
-    let g = c.GetAsync "/" |> Async.RunSynchronously
-    g.Content |> Assert.NotEmpty
-    printfn "%s" g.Content
+    let g = !>>> c.GetAsync  "/"
+    !>? g |> Assert.True
+    !>= g |> Assert.NotNull
+    let c = !>= g
+    Assert.NotNull c.Content
+
+   
     
 
     
