@@ -92,7 +92,7 @@ module Api =
     
     let switch' res f = 
         match res with
-        | Success _ -> f
+        | Success _ -> tryCatch' f
         | Failure failure -> fun _ -> Failure failure
 
     let switchAsync' res f =
@@ -123,7 +123,11 @@ module Api =
     let inline (|><|) res f = switch' res f
 
     let inline (|><<|) res f = switchAsync' res f
+
+    let inline (|!><|) api f = api |> init' |> switch' <| f
     
+    let inline (|!><<|) api f = api |> init' |> switchAsync' <| f
+
     let inline (>>=) f1 f2  = bind' f2 f1 
 
     let inline (>=>) f1 f2 = tryCatch' f1 >> (bind' f2)
