@@ -67,8 +67,6 @@ type HttpClient(baseUrl: string, contentType: HttpClientContentType, ?proxy: str
             } 
         x.GetAsync(query, callback)
             
-    member x.Get (query:string) :ApiResult<HttpClientResponse, exn> = x.GetAsync(query) |> Async.RunSynchronously
-
 and SystemHttpClient = System.Net.Http.HttpClient
 
 and HttpClientContentType =

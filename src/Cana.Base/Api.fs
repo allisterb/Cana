@@ -26,7 +26,7 @@ type Api(?ct: CancellationToken) =
     abstract Initialized: bool with get
 
     member x.CancellationToken = if (ct.IsSome) then ct.Value else Api.Cts.Token 
-    
+ 
 and ApiResult<'TSuccess,'TFailure> = 
     | Success of 'TSuccess
     | Failure of 'TFailure
@@ -44,9 +44,11 @@ module Api =
 
     let inline errex mt args = Api.Error(mt, List.toArray args)
 
+
     let (|Default|) defaultValue input =    
         defaultArg input defaultValue
     
+
     let tryCatch f x =
         try
             f x |> Success
@@ -61,7 +63,6 @@ module Api =
             err "jj" []
             Failure ex
 
-    
     let tryCatchAsync' f x = tryCatch' (f >> Async.RunSynchronously) <| x
     
 
@@ -92,6 +93,10 @@ module Api =
 
     let inline (!>=) result = match result with | Success s -> s | Failure f -> failwith "This Api result was a failure."
 
+    let inline (>>&) f1 f2  = match f1 with | Success _ -> f2 | Failure failure -> Failure failure
+
+    let inline (>>>|) f1 f2  = match f1 with | Success _ -> f2 |> Async.RunSynchronously | Failure failure -> Failure failure
+    
     let inline (>>=) f1 f2  = bind' f2 f1 
 
     let inline (>=>) f1 f2 = tryCatch' f1 >> (bind' f2)

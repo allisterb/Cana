@@ -7,7 +7,7 @@ open Cana
 type TestApi(init) =
     inherit Api() 
     
-    do new ConsoleLogger() |> Api.SetLoggerIfNone
+    do Api.SetDefaultLoggerIfNone()
 
     override this.Initialized with get() = init
 
