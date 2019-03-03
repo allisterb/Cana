@@ -86,9 +86,23 @@ module Api =
         | Success value -> value
         | Failure failure -> failwith "This API result is failure."
 
+    let maybe (f:_ ->ApiResult<'a, exn>) x =
+        try
+            f x |> Success
+        with ex -> ex |> Failure
+
+    let maybeAsync (f:_ -> Async<ApiResult<'a, exn>>)  x =
+        try
+            (f >> Async.RunSynchronously) x |> Success
+        with ex -> ex |> Failure
+    
     let init (api: 'T when 'T :> Api) = if api.Initialized then api else failwith "This API object is not initialized."
 
     let init' (api: 'T when 'T :> Api) = if api.Initialized then Success api else Failure (exn "This API object is not initialized.")
+
+    
+        
+        
     
     let switch' res f = 
         match res with
