@@ -27,10 +27,6 @@ type Api(?ct: CancellationToken) =
 
     member x.CancellationToken = if (ct.IsSome) then ct.Value else Api.Cts.Token 
     
-    static member (!?) (o : 'T when 'T :> Api) = if o.Initialized then o else failwith "This Api object is not initialized."
-
-    static member (!?>) (o : 'T when 'T :> Api) = if o.Initialized then Success o else exn "This Api object not initialized." |> Failure
-    
 and ApiResult<'TSuccess,'TFailure> = 
     | Success of 'TSuccess
     | Failure of 'TFailure

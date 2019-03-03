@@ -12,7 +12,7 @@ open Cana.Tests
 let ``Can construct``() =
     do Api.SetDefaultLoggerIfNone()
     !! TestApi(true) |> Assert.NotNull
-    do (fun _ -> !! TestApi(false) |> ignore) |> Assert.Throws
+    Assert.Throws (fun _ -> !! TestApi(false) |> ignore) |> ignore
     
 
  
