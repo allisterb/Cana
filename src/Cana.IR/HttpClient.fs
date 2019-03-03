@@ -66,7 +66,7 @@ type HttpClient(baseUrl: string, contentType: HttpClientContentType, ?proxy: str
                 return {Success = true; StatusCode = (int) response.StatusCode; Content = r} |> Success
             } 
         x.GetAsync(query, callback)
-            
+             
 and SystemHttpClient = System.Net.Http.HttpClient
 
 and HttpClientContentType =

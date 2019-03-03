@@ -34,8 +34,7 @@ and ApiResult<'TSuccess,'TFailure> =
 ///Global functions and operators belonging to the Cana API.
 [<AutoOpen>]
 module Api =
-     //Logging functions
-
+     //API Logging
     let inline info mt args = Api.Info(mt, List.toArray args)
 
     let inline debug mt args = Api.Debug(mt, List.toArray args)
@@ -45,10 +44,12 @@ module Api =
     let inline errex mt args = Api.Error(mt, List.toArray args)
 
 
+    //API Patterns
     let (|Default|) defaultValue input =    
         defaultArg input defaultValue
     
 
+    //API Logic
     let tryCatch f x =
         try
             f x |> Success
@@ -65,7 +66,6 @@ module Api =
 
     let tryCatchAsync' f x = tryCatch' (f >> Async.RunSynchronously) <| x
     
-
     let bind f = 
         function
         | Success value -> f value |> Success
@@ -75,27 +75,54 @@ module Api =
         function
         | Success value -> f value
         | Failure failure -> Failure failure
+    
+    let succb = 
+        function
+        | Success _ -> true
+        | Failure _ -> false
 
-   
+    let succ = 
+        function
+        | Success value -> value
+        | Failure failure -> failwith "This API result is failure."
+
+    let init (api: 'T when 'T :> Api) = if api.Initialized then api else failwith "This API object is not initialized."
+
+    let init' (api: 'T when 'T :> Api) = if api.Initialized then Success api else Failure (exn "This API object is not initialized.")
+    
+    let switch' res f = 
+        match res with
+        | Success _ -> f
+        | Failure failure -> fun _ -> Failure failure
+
+    let switchAsync' res f =
+        match res with
+        | Success _ -> tryCatchAsync' f
+        | Failure failure -> fun _ -> Failure failure
+
+    let try' f x = tryCatch' f x
+
+    let try'' f x = tryCatchAsync' f x
+
     let inline (?) (l:bool) (r, j) = if l then r else j
 
     let inline (!?) (x:Option<_>) = x.IsSome
 
     let inline (!!) (x: 'T when 'T :> Api) = if x.Initialized then x else failwith "This Api object is not initialized."
 
-    let inline (!>) (x: 'T when 'T :> Api) = if x.Initialized then Success x else exn "This Api object is not initialized." |> Failure
+    let inline (!>) (x: 'T when 'T :> Api) = init' x
 
     let inline (!>>) f = tryCatch' f   
     
     let inline (!>>>) f = tryCatchAsync' f
 
-    let inline (!>?) result = match result with | Success _ -> true | Failure _ -> false
+    let (!>?) = succb 
 
-    let inline (!>=) result = match result with | Success s -> s | Failure f -> failwith "This Api result was a failure."
+    let inline (!>=) res = succ res
 
-    let inline (>>&) f1 f2  = match f1 with | Success _ -> f2 | Failure failure -> Failure failure
+    let inline (|><|) res f = switch' res f
 
-    let inline (>>>|) f1 f2  = match f1 with | Success _ -> f2 |> Async.RunSynchronously | Failure failure -> Failure failure
+    let inline (|><<|) res f = switchAsync' res f
     
     let inline (>>=) f1 f2  = bind' f2 f1 
 
