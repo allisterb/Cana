@@ -1,3 +1,6 @@
 [submodule "deps/abot"]
 	path = deps/abot
 	url = https://github.com/sjdirect/abot.git
+[submodule "deps/FeedReader"]
+	path = deps/FeedReader
+	url = https://github.com/allisterb/FeedReader.git
