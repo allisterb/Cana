@@ -5,7 +5,7 @@ open System.Diagnostics
 open System.Threading.Tasks
 open System.Threading
 
-/// Base class for Cana API.
+/// Base class for Cana API objects.
 [<AbstractClass>]
 type Api(?ct: CancellationToken) =
     
@@ -49,13 +49,19 @@ module Api =
         defaultArg input defaultValue
     
     //API Logic
-    let tryCatch f x =
+    let inline tryCatch f x =
         try
-            f x |> Success
+            let r = f x
+            if r = null then 
+                Failure null
+            else
+                r |> Success
         with
-        | ex -> Failure ex
+        | ex -> 
+            err "jj" []
+            Failure ex
 
-    let tryCatch' f x =
+    let inline tryCatch' f x =
         try
             f x 
         with
@@ -63,16 +69,16 @@ module Api =
             err "jj" []
             Failure ex
 
-    let tryCatchAsync' f x = tryCatch' Async.RunSynchronously << f <| x
+    let inline tryCatchAsync' f x = tryCatch' Async.RunSynchronously << f <| x
     
     let bind f = 
         function
-        | Success value -> f value |> Success
+        | Success value -> tryCatch' f value
         | Failure failure -> Failure failure
 
     let bind' f = 
         function
-        | Success value -> f value
+        | Success value -> tryCatch' f value
         | Failure failure -> Failure failure
     
     let succb = 
@@ -93,7 +99,7 @@ module Api =
         match res with
         | Success _ -> tryCatch' f
         | Failure failure -> fun _ -> Failure failure
-
+    
     let switchAsync' res f =
         match res with
         | Success _ -> tryCatchAsync' f
@@ -107,21 +113,23 @@ module Api =
 
     let inline (!?) (x:Option<_>) = x.IsSome
 
-    let inline (!!) (x: 'T when 'T :> Api) = if x.Initialized then x else failwith "This Api object is not initialized."
-
-    let inline (!>) (x: 'T when 'T :> Api) = init' x
+    let inline (!>) f = tryCatch f
 
     let inline (!>>) f = tryCatch' f   
     
     let inline (!>>>) f = tryCatchAsync' f
 
-    let (!>?) = succb 
-
-    let inline (!>=) res = succ res
-
     let inline (|><|) res f = switch' res f
 
     let inline (|><<|) res f = switchAsync' res f
+
+    let inline (!!) (api: 'T when 'T :> Api) = init api
+
+    let inline (!!>) (api: 'T when 'T :> Api) = init' api
+
+    let inline (!>=) x = succ x
+
+    let (!>?) = succb 
 
     let inline (|!><|) api f = api |> init' |> switch' <| f
     
@@ -130,8 +138,6 @@ module Api =
     let inline (>>=) f1 f2  = bind' f2 f1 
 
     let inline (>=>) f1 f2 = tryCatch' f1 >> (bind' f2)
-
-    let inline (>=>>) f1 f2 =  tryCatch' f1 >> f2 
 
    
 

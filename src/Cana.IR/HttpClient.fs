@@ -72,15 +72,19 @@ type HttpClient(baseUrl: string, contentType: HttpClientContentType, ?proxy: str
 and SystemHttpClient = System.Net.Http.HttpClient
 
 and HttpClientContentType =
-    | Json
     | Html
-    with member x.Str with get() = match x with |Json -> "application/json" |Html -> "text/html"
+    | Json
+    | Rss
+    | Atom
+    with member x.Str with get() = 
+                            match x with 
+                            | Json -> "application/json" 
+                            | Html -> "text/html" 
+                            | Rss -> "application/rss+xml" 
+                            | Atom -> "application/atom+xml"
     
 and HttpClientResponse = {Success: bool; StatusCode: int; Content: string}
 
-module HttpClient = 
-
-   let getString response = response.Content |> Success
         
         
     

@@ -21,7 +21,7 @@ let ``HttpClient API behaves correctly``() =
     do Api.SetDefaultLoggerIfNone()
     
     let badUrl = HttpClient("foo", Html)
-    let r1 = !> badUrl |><| Async.RunSynchronously << badUrl.GetAsync <| "/" 
+    let r1 = !!> badUrl |><| Async.RunSynchronously << badUrl.GetAsync <| "/" 
     Assert.False !>? r1
     Assert.Throws(fun _ -> init(HttpClient("foo", Html)).GetAsync >> Async.RunSynchronously <| "/" |> ignore) |> ignore 
     

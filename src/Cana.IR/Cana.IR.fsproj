@@ -12,6 +12,7 @@
     <Compile Include="RssFeed.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\deps\FeedReader\FeedReader\FeedReader.csproj" />
     <ProjectReference Include="..\Cana.Base\Cana.Base.fsproj" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
