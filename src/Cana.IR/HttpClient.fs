@@ -2,19 +2,20 @@ namespace Cana.IR
 
 open System
 open System.IO
-open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
 open System.Threading
-open System.Threading.Tasks
 
 open Cana
-open System.Threading
 
 type HttpClient(baseUrl: string, contentType: HttpClientContentType, ?proxy: string, ?ct: CancellationToken) =
     inherit Api(?ct = ct)
 
     let mutable _Initialized = false
+
+    let mutable _client = null
+
+    let userAgent = "Cana"
 
     let urlParsed, urlResult = Uri.TryCreate (baseUrl, UriKind.Absolute)
 
@@ -25,27 +26,28 @@ type HttpClient(baseUrl: string, contentType: HttpClientContentType, ?proxy: str
             err "Could not parse base Url string {0}." [baseUrl]       
         else if !? proxy && not proxyUrlParsed then
             err "Could not parse proxy Url string {0}." [proxy.Value] 
-        else _Initialized <- true
-  
-    static member UserAgent = "Cana"
+        else 
+            _client <- new SystemHttpClient()
+            _client.BaseAddress <- urlResult
+            _client.DefaultRequestHeaders.Accept.Clear()
+            _client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue(contentType.Str))
+            _client.DefaultRequestHeaders.Add("user-agent", userAgent)
+            _Initialized <- true
 
     override x.Initialized with get() = _Initialized
 
-    member x.Url = urlResult
+    member x.UserAgent = userAgent
+
+    member x.BaseAddress = _client.BaseAddress
    
     member x.ProxyUrl = proxyUrlResult
 
     member x.ContentType = contentType
 
     member x.GetAsync (query:string, callback):Async<ApiResult<HttpClientResponse, exn>> =        
-        async {
-            use client = new SystemHttpClient()
-            client.BaseAddress <- x.Url
-            do client.DefaultRequestHeaders.Accept.Clear()
-            do client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue(x.ContentType.Str))
-            do client.DefaultRequestHeaders.Add("user-agent", HttpClient.UserAgent)
-
-            let! r = client.GetAsync(query, x.CancellationToken) |> Async.AwaitTask
+     
+       async {
+            let! r = _client.GetAsync(query, x.CancellationToken) |> Async.AwaitTask
             debug "Received HTTP status code {0} from server" [r.StatusCode]
            
             use! stream = 
@@ -76,6 +78,9 @@ and HttpClientContentType =
     
 and HttpClientResponse = {Success: bool; StatusCode: int; Content: string}
 
+module HttpClient = 
+
+   let getString response = response.Content |> Success
         
         
     

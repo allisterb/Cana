@@ -21,8 +21,7 @@ type Api(?ct: CancellationToken) =
     static member Info(messageTemplate:string, [<ParamArray>]args:obj[]) = Api.Logger.Value.Info(messageTemplate, args)
     static member Debug(messageTemplate:string, [<ParamArray>]args:obj[]) = Api.Logger.Value.Debug(messageTemplate, args)
     static member Error(messageTemplate:string, [<ParamArray>]args:obj[]) = Api.Logger.Value.Error(messageTemplate, args)
-    static member Error s = Api.Error(s)
-
+   
     abstract Initialized: bool with get
 
     member x.CancellationToken = if (ct.IsSome) then ct.Value else Api.Cts.Token 
@@ -30,6 +29,8 @@ type Api(?ct: CancellationToken) =
 and ApiResult<'TSuccess,'TFailure> = 
     | Success of 'TSuccess
     | Failure of 'TFailure
+
+with member x.Res with get() = match x with | Success s -> s | Failure f -> failwith "This result is a failure."
     
 ///Global functions and operators belonging to the Cana API.
 [<AutoOpen>]
@@ -43,12 +44,10 @@ module Api =
 
     let inline errex mt args = Api.Error(mt, List.toArray args)
 
-
     //API Patterns
     let (|Default|) defaultValue input =    
         defaultArg input defaultValue
     
-
     //API Logic
     let tryCatch f x =
         try
@@ -64,7 +63,7 @@ module Api =
             err "jj" []
             Failure ex
 
-    let tryCatchAsync' f x = tryCatch' (f >> Async.RunSynchronously) <| x
+    let tryCatchAsync' f x = tryCatch' Async.RunSynchronously << f <| x
     
     let bind f = 
         function
@@ -86,24 +85,10 @@ module Api =
         | Success value -> value
         | Failure failure -> failwith "This API result is failure."
 
-    let maybe (f:_ ->ApiResult<'a, exn>) x =
-        try
-            f x |> Success
-        with ex -> ex |> Failure
-
-    let maybeAsync (f:_ -> Async<ApiResult<'a, exn>>)  x =
-        try
-            (f >> Async.RunSynchronously) x |> Success
-        with ex -> ex |> Failure
-    
     let init (api: 'T when 'T :> Api) = if api.Initialized then api else failwith "This API object is not initialized."
 
     let init' (api: 'T when 'T :> Api) = if api.Initialized then Success api else Failure (exn "This API object is not initialized.")
 
-    
-        
-        
-    
     let switch' res f = 
         match res with
         | Success _ -> tryCatch' f

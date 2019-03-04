@@ -9,6 +9,7 @@
   <ItemGroup>
     <None Include="paket.references" />
     <Compile Include="HttpClient.fs" />
+    <Compile Include="RssFeed.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cana.Base\Cana.Base.fsproj" />
