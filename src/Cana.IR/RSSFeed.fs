@@ -19,5 +19,5 @@ module RssFeed =
     let internal getFeedUrlsFromHtmlPage (c:HttpClient) url  = getUrlContent c url >>>= parseFeedUrlsFromHtml >>= Seq.map (fun l -> l.Url)
     
     // Get a Feed object given a Url and HttpClient
-    let internal getFeedFromUrl (c:HttpClient) url callback = c |>> getUrlContent c <| url >>= FeedReader.ReadFromString >>= callback
+    let internal getFeedFromUrl (c:HttpClient) url callback = c >>| getUrlContent c <| url >>= FeedReader.ReadFromString >>= callback
         

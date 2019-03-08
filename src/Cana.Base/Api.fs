@@ -115,10 +115,6 @@ module Api =
     
     let inline (!>>>) f = tryCatchAsync' f
 
-    let inline (>>|) res f = switch' res f
-
-    let inline (>>>|) res f = switchAsync' res f
-
     let inline (!!) (api: 'T when 'T :> Api) = init api
 
     let inline (!!>) (api: 'T when 'T :> Api) = init' api 
@@ -127,9 +123,13 @@ module Api =
 
     let inline (!>?) res = test res
 
-    let inline (|>>) api f = api |> init' |> switch' <| f
+    let inline (|>>) res f = switch' res f
+
+    let inline (|>>>) res f = switchAsync' res f
+
+    let inline (>>|) api f = api |> init' |> switch' <| f
     
-    let inline (|>>>) api f = api |> init' |> switchAsync' <| f
+    let inline (>>>|) api f = api |> init' |> switchAsync' <| f
 
     let inline (>>=) f1 f2  = bind f2 f1 
 
