@@ -3,15 +3,15 @@
 open System
 open Microsoft.FSharp.Quotations
 
+[<AutoOpen>]
 module Code = 
     type SourceLocation = {Line : string; Dir: string; File: string}
 
-    let inline location() =
-        {
-            Line = __LINE__;
-            Dir = __SOURCE_DIRECTORY__
-            File = __SOURCE_FILE__
-        }
+    let inline here() = {
+        Line = __LINE__;
+        Dir = __SOURCE_DIRECTORY__
+        File = __SOURCE_FILE__
+    }
         
 
     let rec funName = function

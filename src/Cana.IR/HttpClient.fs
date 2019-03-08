@@ -5,6 +5,7 @@ open System.IO
 open System.Net.Http
 open System.Net.Http.Headers
 open System.Threading
+open System.Threading.Tasks
 
 open Cana
 

@@ -51,11 +51,7 @@ module Api =
     //API Logic
     let inline tryCatch f x =
         try
-            let r = f x
-            if r = null then 
-                Failure null
-            else
-                r |> Success
+            f x |> Success
         with
         | ex -> 
             err "jj" []
@@ -73,7 +69,7 @@ module Api =
     
     let bind f = 
         function
-        | Success value -> tryCatch' f value
+        | Success value -> tryCatch f value
         | Failure failure -> Failure failure
 
     let bind' f = 
@@ -81,7 +77,7 @@ module Api =
         | Success value -> tryCatch' f value
         | Failure failure -> Failure failure
     
-    let succb = 
+    let test = 
         function
         | Success _ -> true
         | Failure _ -> false
@@ -119,23 +115,25 @@ module Api =
     
     let inline (!>>>) f = tryCatchAsync' f
 
-    let inline (|><|) res f = switch' res f
+    let inline (>>|) res f = switch' res f
 
-    let inline (|><<|) res f = switchAsync' res f
+    let inline (>>>|) res f = switchAsync' res f
 
     let inline (!!) (api: 'T when 'T :> Api) = init api
 
-    let inline (!!>) (api: 'T when 'T :> Api) = init' api
+    let inline (!!>) (api: 'T when 'T :> Api) = init' api 
 
     let inline (!>=) x = succ x
 
-    let (!>?) = succb 
+    let inline (!>?) res = test res
 
-    let inline (|!><|) api f = api |> init' |> switch' <| f
+    let inline (|>>) api f = api |> init' |> switch' <| f
     
-    let inline (|!><<|) api f = api |> init' |> switchAsync' <| f
+    let inline (|>>>) api f = api |> init' |> switchAsync' <| f
 
-    let inline (>>=) f1 f2  = bind' f2 f1 
+    let inline (>>=) f1 f2  = bind f2 f1 
+
+    let inline (>>>=) f1 f2  = bind' f2 f1 
 
     let inline (>=>) f1 f2 = tryCatch' f1 >> (bind' f2)
 

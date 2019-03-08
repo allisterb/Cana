@@ -12,7 +12,7 @@ type IO() =
 
     static member GetFiles recurse pattern srcPath =
         if not <| Directory.Exists srcPath then
-            do Api.Error ("The path {0} does not exist.", srcPath)
+            err "The path {0} does not exist." [srcPath]
             (-1, Array.empty)
         else
             let files = Directory.GetFiles(srcPath, pattern, recurse ? (SearchOption.AllDirectories, SearchOption.TopDirectoryOnly))

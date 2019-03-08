@@ -7,6 +7,7 @@
     <PackageReference Update="FSharp.Core" Version="4.5.4" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
     <None Include="paket.references" />
     <Compile Include="HttpClient.fs" />
     <Compile Include="RssFeed.fs" />
